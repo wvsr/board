@@ -21,6 +21,9 @@ const TodoApp = () => {
     date: new Date().toISOString().split('T')[0],
   })
 
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState(null)
+
   // Ref for task name input and columns
   const taskNameInputRef = useRef(null)
   const descRef = useRef(null)
@@ -175,6 +178,11 @@ const TodoApp = () => {
     setIsModalOpen(true)
   }
 
+  const openDetailsModal = (task) => {
+    setSelectedTask(task)
+    setIsDetailsModalOpen(true)
+  }
+
   const renderColumn = (title, columnKey) => (
     <div
       ref={columnsRef.current[columnKey]}
@@ -200,11 +208,12 @@ const TodoApp = () => {
           key={task.id}
           draggable
           onDragStart={(e) => handleDragStart(e, task, columnKey)}
+          onClick={() => openDetailsModal(task)}
           className={`${getTaskColor(
             task
-          )} p-3 rounded shadow-sm cursor-move transition flex items-start space-x-2 relative group`}
+          )} p-3 rounded shadow-sm cursor-pointer transition flex items-start space-x-2 relative group`}
         >
-          <Grip className='w-4 h-4 text-gray-400 mt-1' />
+          <Grip className='w-4 h-4 text-gray-400 mt-1 drag-handle cursor-move' />
           <div className='flex-grow'>
             <h3 className='font-mono font-semibold text-gray-100'>
               {task.name}
@@ -223,7 +232,10 @@ const TodoApp = () => {
             )}
           </div>
           <button
-            onClick={() => deleteTask(columnKey, task.id)}
+            onClick={(e) => {
+              e.stopPropagation()
+              deleteTask(columnKey, task.id)
+            }}
             className='absolute top-1 right-1 text-red-500 opacity-0 group-hover:opacity-100 transition'
           >
             <Trash2 className='w-4 h-4' />
@@ -306,6 +318,52 @@ const TodoApp = () => {
             >
               Save Task
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Task Details Modal */}
+      {isDetailsModalOpen && selectedTask && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div
+            className='fixed inset-0 bg-transparent z-20'
+            onClick={() => {
+              setIsDetailsModalOpen(false)
+              setSelectedTask(null)
+            }}
+          ></div>
+          <div className='bg-gray-800 text-gray-100 rounded-lg p-6 w-96 relative z-30 max-w-md mx-auto'>
+            <button
+              onClick={() => {
+                setIsDetailsModalOpen(false)
+                setSelectedTask(null)
+              }}
+              className='absolute top-3 right-3 text-gray-400 hover:text-gray-200'
+            >
+              <X className='w-6 h-6' />
+            </button>
+            <h2 className='text-xl font-mono font-bold mb-4 text-gray-100'>
+              {selectedTask.name}
+            </h2>
+            {selectedTask.description && (
+              <p className='text-sm text-gray-300 mb-2 whitespace-pre-wrap break-words'>
+                {selectedTask.description}
+              </p>
+            )}
+            {selectedTask.date && (
+              <p
+                className={`text-xs font-mono ${
+                  isOverdue(selectedTask.date)
+                    ? 'text-red-400'
+                    : 'text-gray-500'
+                }`}
+              >
+                Due Date: {selectedTask.date}
+                {isOverdue(selectedTask.date) && (
+                  <span className='italic'> (Overdue)</span>
+                )}
+              </p>
+            )}
           </div>
         </div>
       )}
