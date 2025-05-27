@@ -211,11 +211,11 @@ const TodoApp = () => {
           onClick={() => openDetailsModal(task)}
           className={`${getTaskColor(
             task
-          )} p-3 rounded shadow-sm cursor-pointer transition flex items-start space-x-2 relative group`}
+          )} p-3 rounded shadow-sm cursor-move transition flex items-start space-x-2 relative group`}
         >
           <Grip className='w-4 h-4 text-gray-400 mt-1 drag-handle cursor-move' />
           <div className='flex-grow'>
-            <h3 className='font-mono font-semibold text-gray-100'>
+            <h3 className='font-mono font-semibold text-gray-100 cursor-pointer'>
               {task.name}
             </h3>
             {task.description && (
